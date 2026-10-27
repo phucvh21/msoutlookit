@@ -1,0 +1,118 @@
+/* ============================================================
+   CLASSIC OUTLOOK 2013 LAYER — flat and plain, like the original
+   (no avatars, rounded chips, gradients or accent bars).
+   Loaded after outlook.css and overrides its pane styling.
+   ============================================================ */
+:root {
+  --sidebar-w: 235px;
+  --list-w: 396px;
+  --sel: #cde6f7;          /* selected message row */
+  --hover: #e6f2fa;        /* hovered message row */
+  --folder-sel: #e1e1e1;   /* selected folder (grey in 2013) */
+  --o-blue: #0072c6;
+  --o-line: #dadada;
+}
+.workspace { background: #fff; }
+
+/* ---- folder pane ---- */
+.folder-pane { display: flex; flex-direction: column; padding: 0; overflow: hidden; background: #fff; border-right: 1px solid var(--o-line); }
+.fp-scroll { flex: 1 1 auto; overflow-y: auto; position: relative; padding: 14px 0 8px; }
+.fp-collapse { position: absolute; right: 10px; top: 8px; width: 14px; text-align: center; font-size: 16px; line-height: 14px; color: #666; cursor: pointer; user-select: none; }
+.fp-collapse:hover { color: #000; }
+.workspace.fp-min .folder-pane { width: 28px; }
+.workspace.fp-min .fp-scroll > :not(.fp-collapse), .workspace.fp-min .fp-nav { display: none; }
+.workspace.fp-min .fp-collapse { right: 7px; transform: scaleX(-1); }
+
+.fp-section { margin: 0; }
+.fp-head { gap: 5px; padding: 4px 10px 4px 12px; font-size: 13px; font-weight: 400; color: #444; }
+.fp-head:hover { background: transparent; }
+.fp-head .tri { color: #666; font-size: 8px; width: 9px; }
+.fp-section.collapsed > .fp-items { display: none; }
+.fp-section.collapsed > .fp-head .tri { transform: rotate(-45deg); }
+.fp-fav { padding-bottom: 12px; margin: 0 6px 4px; border-bottom: 1px solid var(--o-line); }
+.fp-fav .fp-head { padding-left: 6px; }
+.fp-fav > .fp-head, .fp-odf > .fp-head { margin-bottom: 6px; }
+.fp-odf { margin-top: 18px; }
+.fp-items { padding-left: 0; }
+.fp-fav .fp-items .afolder { padding-left: 18px; }
+.fp-odf > .fp-items > .fp-section > .fp-head.sub { padding: 2px 10px 2px 12px; font-size: 12.5px; }
+
+.afolder { margin: 0; padding: 4px 10px 4px 18px; font-size: 12px; gap: 0; border: none; border-radius: 0; color: #333; }
+.afolder.static { font-size: 12.5px; padding: 4px 6px 4px 17px; cursor: default; }
+#folderList .afolder { font-size: 11px; padding: 3px 8px 3px 29px; height: 17px; line-height: 11px; }
+.afolder:hover { background: var(--hover); }
+.afolder.static:hover { background: transparent; }
+.afolder.active { background: var(--folder-sel); box-shadow: none; font-weight: 400; color: #000; }
+.afolder .unread-badge { margin-left: auto; background: none; box-shadow: none; color: var(--o-blue); font-weight: 400; font-size: 11px; padding: 0 2px; line-height: 11px; min-width: 0; }
+
+.fp-nav { flex: 0 0 auto; height: 44px; display: flex; align-items: center; gap: 24px; padding: 0 18px; background: #f3f3f3; border-top: 1px solid var(--o-line); color: #555; }
+.fp-nav svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.fp-nav svg.on { width: 18px; color: var(--o-blue); }
+.fp-nav .more { font-size: 8px; letter-spacing: 1px; margin-left: auto; margin-right: 10px; color: #444; }
+
+/* ---- message list ---- */
+.list-pane { width: var(--list-w); border-right: 1px solid var(--o-line); }
+.list-header { box-shadow: none; border-bottom: none; padding-bottom: 2px; }
+.list-title { display: none; }
+.searchrow { padding: 10px 8px 6px 14px; }
+.searchbox { position: relative; flex: 1 1 auto; display: flex; align-items: center; height: 22px; border: 1px solid #abadb3; background: #fff; min-width: 0; }
+.searchbox:focus-within { border-color: var(--o-blue); }
+.mail-search { flex: 1 1 auto; border: none; background: none; padding: 0 28px 0 6px; font-size: 12px; height: 20px; color: #333; box-shadow: none !important; }
+.mail-search::placeholder { color: #666; }
+.searchbox .mag { position: absolute; right: 100px; top: 4px; width: 13px; height: 13px; color: #555; pointer-events: none; }
+.fresh-select { width: 96px; height: 20px; padding: 0 16px 0 7px; border: none; border-left: 1px solid #c9c9c9; border-radius: 0; font-size: 12px; color: #555; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4'%3E%3Cpath d='M0 0h7L3.5 4z' fill='%23777'/%3E%3C/svg%3E") right 5px center no-repeat; cursor: pointer; }
+.filterrow { padding: 2px 8px 4px 14px; }
+.ftabs { gap: 12px; }
+.ftab { font-size: 15px; color: #666; font-weight: 400; padding: 0; }
+.ftab:hover, .ftab.active { color: var(--o-blue); font-weight: 400; }
+.ftab.active::after { display: none; }
+.sort-by { font-size: 12px; color: #555; gap: 10px; }
+.sort-select { font-size: 12px; color: #555; padding: 0; }
+.list-status { background: #fff; border-top: 1px solid var(--o-line); color: #777; font-size: 11px; }
+
+.anemail { display: block; padding: 5px 10px 5px 24px; border-bottom: 1px solid #e8e8e8; min-height: 0; }
+.anemail:hover { background: var(--hover); }
+.anemail.active { background: var(--sel); box-shadow: none; }
+.anemail.unread::before { left: 9px; top: 12px; transform: none; width: 6px; height: 6px; background: var(--o-blue); }
+.emailtop, .emailbottom { display: flex; align-items: baseline; gap: 8px; }
+.emailname { flex: 1 1 auto; min-width: 0; font-size: 13px; font-weight: 400; color: #222; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.anemail.unread .emailname { font-weight: 700; color: #000; }
+.emaildate { flex: 0 0 auto; font-size: 11.5px; color: var(--o-blue); }
+.emailtitle { font-size: 13px; margin: 0; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.anemail.unread .emailtitle { color: var(--o-blue); font-weight: 600; }
+.emailpreview { flex: 1 1 auto; min-width: 0; font-size: 12px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+.emailcount { flex: 0 0 auto; font-size: 11px; color: #888; }
+
+/* ---- reading pane: plain white page, Calibri-style text ---- */
+.welcome { padding: 34px 30px; max-width: none; font-family: var(--font-body); font-size: 14px; color: #000; }
+.welcome p { font-size: 14px; line-height: 1.3; margin: 0 0 1.3em; }
+.read-header { background: #fff; border-bottom: 1px solid var(--o-line); padding: 18px 30px 12px; }
+.read-subject { font-size: 18px; font-weight: 400; letter-spacing: 0; color: #000; margin-bottom: 4px; text-wrap: wrap; }
+.read-from { font-size: 13px; color: #000; display: block; }
+.read-from .who { font-weight: 600; }
+.dimtxt { color: #666; }
+.read-metachips { margin-top: 6px; gap: 14px; font-size: 12px; color: #666; }
+.chip { background: none; border: none; border-radius: 0; padding: 0; color: #666; }
+.read-actions { margin-top: 8px; gap: 6px; }
+.linkbtn { border: 1px solid #adadad; border-radius: 0; background: #e1e1e1; color: #000; padding: 2px 10px; font-size: 12px; }
+.linkbtn:hover { background: #e5f1fb; border-color: var(--o-blue); box-shadow: none; }
+.read-body { padding: 18px 30px; max-width: none; font-size: 14px; color: #000; }
+.read-body a, .welcome a { color: #0563c1; }
+.post-link-card { border-radius: 0; background: #fff; border-color: #d0d0d0; }
+.section-head { margin: 0 30px; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #444; border-bottom: 1px solid var(--o-line); }
+.comments { padding: 6px 30px 48px; }
+.comment .c-author { font-size: 12.5px; color: #1f4e79; }
+.comment .c-op { border-radius: 0; background: #ddebf7; }
+.comment.hi-reply { background: #e0ffff; }
+.comment.hi-self { background: #cae6e6; box-shadow: inset 0 0 0 1px #6aa7ff; }
+.d1  { border-left-color: #0066ff; } .d2  { border-left-color: #0099ff; } .d3  { border-left-color: #00ccff; }
+.d4  { border-left-color: #00cca3; } .d5  { border-left-color: #00cc7a; } .d6  { border-left-color: #33ff33; }
+.d7  { border-left-color: #66ff66; } .d8  { border-left-color: #99ff33; } .d9  { border-left-color: #ccff33; }
+.d10 { border-left-color: #ffff00; } .d11 { border-left-color: #ffcc00; } .d12 { border-left-color: #ff9933; }
+
+/* Windows-style scrollbars */
+::-webkit-scrollbar { width: 17px; height: 17px; }
+::-webkit-scrollbar-track { background: #f0f0f0; }
+::-webkit-scrollbar-thumb { background: #cdcdcd; border: 0; border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: #a6a6a6; }
+* { scrollbar-width: auto; scrollbar-color: #cdcdcd #f0f0f0; }

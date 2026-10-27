@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Reddit connectivity test (browser)</title>
+<style>
+  body { font-family: Consolas, monospace; background: #1e1e1e; color: #ddd; padding: 20px; }
+  h1 { font-size: 16px; }
+  .row { border-bottom: 1px solid #333; padding: 8px 0; }
+  .ok { color: #6c6; }
+  .fail { color: #f66; }
+  .warn { color: #fc6; }
+  pre { margin: 4px 0 0 0; white-space: pre-wrap; word-break: break-all; color: #999; font-size: 12px; }
+  button { padding: 8px 16px; font-size: 14px; cursor: pointer; }
+  .note { background: #2a2a2a; padding: 10px; margin-bottom: 16px; border-left: 3px solid #6c6; font-size: 12px; }
+</style>
+</head>
+<body>
+  <h1>Reddit connectivity test (from your browser)</h1>
+  <div class="note">
+    This page must be served over <b>http://</b> (run <code>node test/server.js</code> and open
+    <code>http://localhost:8000/test/browser-test.html</code>). Browsers can't set a User-Agent
+    header, so this shows exactly what a static page can and can't reach.
+  </div>
+  <button id="run">Run test</button>
+  <div id="out"></div>
+
+<script>
+const ENDPOINTS = [
+  "https://www.reddit.com/r/programming.json?limit=1",
+  "https://www.reddit.com/r/programming/hot.json?limit=1",
+  "https://api.reddit.com/r/programming?limit=1",
+  "https://www.reddit.com/r/programming/comments/.json",
+];
+
+const out = document.getElementById("out");
+
+function row(text, cls) {
+  const d = document.createElement("div");
+  d.className = "row " + (cls || "");
+  d.innerHTML = text;
+  out.appendChild(d);
+  return d;
+}
+
+async function testFetch(url) {
+  const t0 = performance.now();
+  try {
+    const res = await fetch(url, { headers: { Accept: "application/json" } });
+    const ms = Math.round(performance.now() - t0);
+    const text = await res.text();
+    const cls = res.ok ? "ok" : "fail";
+    row(`<b class="${cls}">${res.status} ${res.statusText}</b> — ${url} <span style="color:#666">(${ms}ms)</span>
+         <pre>${text.slice(0, 200).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</pre>`, cls);
+  } catch (e) {
+    // TypeError "Failed to fetch" almost always = CORS block or network refusal.
+    row(`<b class="fail">FETCH FAILED</b> — ${url}<pre>${e.name}: ${e.message}</pre>`, "fail");
+  }
+}
+
+document.getElementById("run").addEventListener("click", async () => {
+  out.innerHTML = "";
+  row(`Origin: <code>${location.origin}</code> — this origin is what Reddit sees.`);
+  for (const url of ENDPOINTS) {
+    await testFetch(url);
+  }
+  row(`<b>Interpretation:</b> any <span class="ok">200</span> means live Reddit works from your browser.
+        All <span class="fail">403 / FETCH FAILED</span> means we need a proxy or OAuth.`);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inbox - Microsoft Outlook</title>
+<link rel="icon" href="img/favicon.ico" />
+<link rel="preconnect" href="https://arctic-shift.photon-reddit.com" crossorigin />
+<link rel="preload" as="image" href="img/buttons.png" />
+<link rel="stylesheet" href="css/outlook.css" />
+<link rel="stylesheet" href="css/classic.css" />
+</head>
+<body>
+<div class="desktop">
+
+  <!-- ================= TOP CHROME (real MSOutlookit assets) ================= -->
+  <div class="topbar">
+    <div class="upperleft"></div>
+    <div class="upperright"></div>
+    <div class="buttons">
+      <!-- invisible hotspots over the sprite buttons -->
+      <button class="hotspot hs-newemail" id="btnNewEmail" title="New Email — add a subreddit folder"></button>
+      <button class="hotspot hs-delete" id="btnDelete" title="Delete — remove this subreddit folder"></button>
+      <button class="hotspot hs-reply" id="btnReply" title="Reply — reload this folder"></button>
+      <button class="hotspot hs-replyall" id="btnRefresh" title="Reply All — reload this folder"></button>
+      <button class="hotspot hs-forward" id="btnForward" title="Forward — open the selected post on reddit.com"></button>
+    </div>
+  </div>
+
+  <!-- ================= WORKSPACE ================= -->
+  <div class="workspace">
+    <aside class="folder-pane">
+      <div class="fp-scroll">
+        <div class="fp-collapse" title="Minimize the Folder Pane">&#8249;</div>
+        <div class="fp-section fp-fav">
+          <div class="fp-head"><span class="tri">&#9698;</span>Favorites</div>
+          <div class="fp-items">
+            <div class="afolder static">Inbox</div>
+            <div class="afolder static">Sent Items</div>
+            <div class="afolder static">Deleted Items</div>
+          </div>
+        </div>
+        <div class="fp-section fp-odf">
+          <div class="fp-head"><span class="tri">&#9698;</span>Outlook Data File</div>
+          <div class="fp-items">
+            <div class="fp-section fp-inbox">
+              <div class="fp-head sub"><span class="tri">&#9698;</span>Inbox</div>
+              <div class="fp-items" id="folderList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fp-nav" aria-hidden="true">
+        <svg class="on" viewBox="0 0 18 14"><path d="M1 1h16v12H1z M1 1l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M1 3h14v12H1z M1 6h14 M5 1v4 M11 1v4 M4 9h2 M7 9h2 M10 9h2 M4 12h2 M7 12h2" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        <svg viewBox="0 0 16 16"><circle cx="5.5" cy="5" r="2.4" fill="currentColor"/><path d="M1 13c0-3 2-4.6 4.5-4.6S10 10 10 13z" fill="currentColor"/><circle cx="11.5" cy="5.8" r="2" fill="currentColor"/><path d="M10.6 9.2c2.4-.3 4.4 1 4.4 3.8h-3.6" fill="currentColor"/></svg>
+        <svg viewBox="0 0 16 16"><path d="M2 2h12v13H2z M5 8l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+        <span class="more">&#8226;&#8226;&#8226;</span>
+      </div>
+    </aside>
+
+    <section class="list-pane">
+      <div class="list-header">
+        <div class="searchrow">
+          <span class="list-title" id="listTitle">Inbox</span>
+          <div class="searchbox">
+            <input id="mailSearch" class="mail-search" type="text" placeholder="Search Current Mailbox (Ctrl+E)" autocomplete="off" spellcheck="false" />
+            <svg class="mag" viewBox="0 0 14 14"><circle cx="8" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="5" y1="9" x2="1" y2="13" stroke="currentColor" stroke-width="1.6"/></svg>
+            <select id="freshSelect" class="fresh-select" title="How far back to read posts">
+              <option value="72">Last 3 days</option>
+              <option value="168" selected>Last 7 days</option>
+              <option value="720">Last 30 days</option>
+              <option value="2160">Last 90 days</option>
+            </select>
+          </div>
+        </div>
+        <div class="filterrow">
+          <div class="ftabs">
+            <button class="ftab active" id="filterAll">All</button>
+            <button class="ftab" id="filterUnread">Unread</button>
+          </div>
+          <span class="sort-by">By Date
+            <select id="sortSelect" class="sort-select" title="How to order the message list">
+              <option value="newest">Newest &#8595;</option>
+              <option value="comments">Most comments</option>
+              <option value="score">Top score</option>
+              <option value="oldest">Oldest</option>
+            </select>
+          </span>
+        </div>
+      </div>
+      <div class="list-body" id="listBody"></div>
+      <div class="list-status" id="listStatus"></div>
+    </section>
+
+    <section class="reading-pane">
+      <div class="reading-inner" id="readingPane">
+        <div class="welcome">
+          <p>Welcome to MSOutlookit 2013!</p>
+          <p>Each folder under Inbox is a subreddit, each email is a post, and the reading pane shows its comments.</p>
+          <p><i>Want to add subreddits? Click the "New Email" button and follow the instructions!</i></p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- blue strip at the bottom -->
+  <div class="bottombar"></div>
+
+  <div class="window-layer" id="windowLayer"></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script defer src="js/api.js"></script>
+<script defer src="js/state.js"></script>
+<script defer src="js/app.js"></script>
+</body>
+</html>
