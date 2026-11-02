@@ -152,8 +152,22 @@ async function loadFolder() {
       // Ranking by comments / score: sample across the whole window so the
       // window length actually changes the result.
       $("#listStatus").textContent = "Ranking by " + sortLabel() + " across the last " + Math.round(Freshness.hours / 24) + " days…";
-      const progress = (d, n) => {
-        if (token === App.reqToken) $("#listStatus").textContent = "Ranking by " + sortLabel() + "… " + d + "/" + n;
+      // Show results as chunks arrive (newest days first), re-ranked at most
+      // twice a second; the final render below replaces this.
+      let finished = false, pending = null;
+      const progress = (d, n, soFar) => {
+        if (token !== App.reqToken) return;
+        const status = "Ranking by " + sortLabel() + "… " + d + "/" + n;
+        $("#listStatus").textContent = status;
+        if (!soFar.length || pending || d >= n) return;
+        pending = setTimeout(() => {
+          pending = null;
+          if (finished || token !== App.reqToken) return;
+          App.posts = sortPosts(soFar);
+          applyFilter();
+          renderList();
+          $("#listStatus").textContent = status;
+        }, 500);
       };
       let posts = await RedditAPI.getSampledListing(sub, Freshness.hours, progress);
       if (token !== App.reqToken) return;
@@ -164,6 +178,8 @@ async function loadFolder() {
         if (token !== App.reqToken) return;
         if (posts.length) { toast("Widened to the last " + widen / 24 + " days."); break; }
       }
+      finished = true;
+      clearTimeout(pending);
       App.posts = posts;
       App.hasMore = false;
       advanceCursor(posts);

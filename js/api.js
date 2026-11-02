@@ -30,15 +30,67 @@ const POST_FIELDS =
 /* ---------- low-level fetch with timeout + retry + friendly errors ---------- */
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
-/* In-memory response cache (promise-based, so concurrent identical requests
-   share one fetch). Failed requests are evicted so they can be retried. */
-const CACHE_TTL = 5 * 60 * 1000;
+/* Two-level response cache.
+   - memory: promise-based, so concurrent identical requests share one fetch;
+     failed requests are evicted so they can be retried.
+   - IndexedDB: survives page reloads. Entries expire after CACHE_TTL and are
+     pruned on startup. Every IndexedDB call is best-effort: if storage is
+     unavailable (private mode, quota) the app just falls back to the network. */
+const CACHE_TTL = 30 * 60 * 1000;
 const _cache = new Map();
+
+const Disk = {
+  _db: null,
+  open() {
+    if (this._db) return this._db;
+    this._db = new Promise((resolve) => {
+      try {
+        const req = indexedDB.open("msoutlookit-cache", 1);
+        req.onupgradeneeded = () => req.result.createObjectStore("r");
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = req.onblocked = () => resolve(null);
+      } catch (e) { resolve(null); }
+    });
+    return this._db;
+  },
+  async run(mode, fn) {
+    const db = await this.open();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      try {
+        const tx = db.transaction("r", mode);
+        const out = fn(tx.objectStore("r"));
+        tx.oncomplete = () => resolve(out && "result" in out ? out.result : null);
+        tx.onerror = tx.onabort = () => resolve(null);
+      } catch (e) { resolve(null); }
+    });
+  },
+  get(key) { return this.run("readonly", (st) => st.get(key)); },
+  put(key, val) { return this.run("readwrite", (st) => st.put(val, key)); },
+  clear() { return this.run("readwrite", (st) => st.clear()); },
+  prune() {
+    return this.run("readwrite", (st) => {
+      st.openCursor().onsuccess = (e) => {
+        const c = e.target.result;
+        if (!c) return;
+        if (!c.value || Date.now() - c.value.t > CACHE_TTL) c.delete();
+        c.continue();
+      };
+    });
+  },
+};
+Disk.prune();
 
 function asFetch(path, timeoutMs) {
   const hit = _cache.get(path);
   if (hit && Date.now() - hit.t < CACHE_TTL) return hit.p;
-  const p = asFetchRaw(path, timeoutMs);
+  const p = (async () => {
+    const saved = await Disk.get(path);
+    if (saved && saved.d !== undefined && Date.now() - saved.t < CACHE_TTL) return saved.d;
+    const d = await asFetchRaw(path, timeoutMs);
+    Disk.put(path, { t: Date.now(), d });
+    return d;
+  })();
   _cache.set(path, { t: Date.now(), p });
   p.catch(() => { const c = _cache.get(path); if (c && c.p === p) _cache.delete(path); });
   return p;
@@ -212,7 +264,7 @@ function flattenCommentNodes(items) {
 
 /* ---------- public API ---------- */
 const RedditAPI = {
-  clearCache() { _cache.clear(); },
+  clearCache() { _cache.clear(); Disk.clear(); },
 
   /* Posts for a subreddit inside a true sliding window.
      - `before`  : created_utc pagination cursor (null = first page)
@@ -283,6 +335,8 @@ const RedditAPI = {
 
     // modest concurrency so we don't trip the archive's rate limit
     const results = new Array(cells.length);
+    const seen = new Set();
+    const out = [];
     let next = 0, done = 0, failed = 0, lastErr = null;
     async function worker() {
       while (next < cells.length) {
@@ -294,19 +348,15 @@ const RedditAPI = {
           results[idx] = [];
         }
         done++;
-        if (onProgress) onProgress(done, cells.length);
+        (results[idx] || []).forEach((p) => {
+          if (!seen.has(p.id)) { seen.add(p.id); out.push(p); }
+        });
+        if (onProgress) onProgress(done, cells.length, out);
       }
     }
     await Promise.all([worker(), worker(), worker(), worker()]);
     if (cells.length && failed === cells.length) throw lastErr;
 
-    const seen = new Set();
-    const out = [];
-    results.forEach((list) =>
-      (list || []).forEach((p) => {
-        if (!seen.has(p.id)) { seen.add(p.id); out.push(p); }
-      })
-    );
     return out;
   },
 
